@@ -1,0 +1,35 @@
+###
+GET http://localhost:3000/users
+
+###
+GET http://localhost:3001/products
+
+###
+GET http://localhost:3002/payments
+
+
+###
+GET http://localhost:3003/orders
+
+
+###
+GET http://localhost:3004/deliveries
+
+
+###
+POST http://localhost:3003/orders
+Content-Type: application/json
+
+{
+  "order": {
+    "user_id": "user",
+    "name": "Hong Gil Dong",
+    "addr": "29, Hansil-ro, Dalseo-gu, Daegu, Republic of Korea",
+    "tel": "01012341234",
+    "email": "hong@gil.com"
+  },
+  "product": {
+    "id": 2,
+    "quantity": 5
+  }
+}

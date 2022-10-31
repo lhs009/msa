@@ -1,0 +1,136 @@
+version: "3"
+services:
+  # 실행할 컨테이너
+  user-service:
+    container_name: user-service
+    # 사용할 이미지 이름과 태그를 정의한다.
+    # 빌드시에 여기에 명시한 이미지 이름과 태그가 빌드된 이미지에 붙게 된다. 없으면 자동 부여
+    build:
+      # Dockerfile 이름
+      dockerfile: ./user/Dockerfile
+      # Build 디렉토리.
+      context: ./
+    ports:
+      - "3000:3000" # local port:container port
+    environment:
+      - NODE_ENV=dev
+      - PROCESS_NAME=user-service
+      - DB_HOST=local-db
+      - DB_USER=root
+      - DB_PASSWORD=admin1234
+      - DB_NAME=user_db
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - /app/node_modules
+      - .:/app
+
+  product-service:
+    container_name: product-service
+    build:
+      dockerfile: ./product/Dockerfile
+      context: ./
+    ports:
+      - "3001:3001" # local port:container port
+    environment:
+      - NODE_ENV=dev
+      - PROCESS_NAME=product-service
+      - DB_HOST=local-db
+      - DB_USER=root
+      - DB_PASSWORD=admin1234
+      - DB_NAME=product_db
+      - MESSAGE_BROKER_HOST=amqp://message-broker:5672
+      - MESSAGE_ORDER_Q=MESSAGE_ORDER_Q
+      - MESSAGE_PRODUCT_Q=MESSAGE_PRODUCT_Q
+      - MESSAGE_PAYMENT_Q=MESSAGE_PAYMENT_Q
+      - MESSAGE_DELIVERY_Q=MESSAGE_DELIVERY_Q
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - /app/node_modules
+      - .:/app
+
+  payment-service:
+    container_name: payment-service
+    build:
+      dockerfile: ./payment/Dockerfile
+      context: ./
+    ports:
+      - "3002:3002"
+    environment:
+      - NODE_ENV=dev
+      - PROCESS_NAME=product-service
+      - DB_HOST=local-db
+      - DB_USER=root
+      - DB_PASSWORD=admin1234
+      - DB_NAME=payment_db
+      - MESSAGE_BROKER_HOST=amqp://message-broker:5672
+      - MESSAGE_ORDER_Q=MESSAGE_ORDER_Q
+      - MESSAGE_PRODUCT_Q=MESSAGE_PRODUCT_Q
+      - MESSAGE_PAYMENT_Q=MESSAGE_PAYMENT_Q
+      - MESSAGE_DELIVERY_Q=MESSAGE_DELIVERY_Q
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - /app/node_modules
+      - .:/app
+
+  order-service:
+    container_name: order-service
+    build:
+      dockerfile: ./order/Dockerfile
+      context: ./
+    ports:
+      - "3003:3003"
+    environment:
+      - NODE_ENV=dev
+      - PROCESS_NAME=order-service
+      - DB_HOST=local-db
+      - DB_USER=root
+      - DB_PASSWORD=admin1234
+      - DB_NAME=order_db
+      - MESSAGE_BROKER_HOST=amqp://message-broker:5672
+      - MESSAGE_ORDER_Q=MESSAGE_ORDER_Q
+      - MESSAGE_PRODUCT_Q=MESSAGE_PRODUCT_Q
+      - MESSAGE_PAYMENT_Q=MESSAGE_PAYMENT_Q
+      - MESSAGE_DELIVERY_Q=MESSAGE_DELIVERY_Q
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - /app/node_modules
+      - .:/app
+
+  delivery-service:
+    container_name: delivery-service
+    build:
+      dockerfile: ./delivery/Dockerfile
+      context: ./
+    ports:
+      - "3004:3004"
+    environment:
+      - NODE_ENV=dev
+      - PROCESS_NAME=delivery-service
+      - DB_HOST=local-db
+      - DB_USER=root
+      - DB_PASSWORD=admin1234
+      - DB_NAME=delivery_db
+      - MESSAGE_BROKER_HOST=amqp://message-broker:5672
+      - MESSAGE_ORDER_Q=MESSAGE_ORDER_Q
+      - MESSAGE_PRODUCT_Q=MESSAGE_PRODUCT_Q
+      - MESSAGE_PAYMENT_Q=MESSAGE_PAYMENT_Q
+      - MESSAGE_DELIVERY_Q=MESSAGE_DELIVERY_Q
+    deploy:
+      restart_policy:
+        condition: on-failure
+    volumes:
+      - /app/node_modules
+      - .:/app
+
+networks:
+  default:
+    name: shopping_mall_net
+    external: true

@@ -1,0 +1,40 @@
+version: "3"
+services:
+  local-db:
+    platform: linux/x86_64 # 추가된 라인 M1 에서만 추가
+    image: library/mysql:8.0.23
+    container_name: local-db
+    command: # 명령어 실행 한글 깨짐 방지
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - 3306:3306 # 호스트 : 컨테이너
+    environment:
+      MYSQL_ROOT_PASSWORD: admin1234 # 초기비밀번호
+      TZ: Asia/Seoul
+    volumes:
+      - ./data:/var/lib/mysql # 디렉토리 마운트 설정
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
+
+  message-broker:
+    container_name: message-broker
+    image: rabbitmq:3-alpine
+    ports:
+      - "5672:5672"
+      # - "15672:15672"
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s
+
+networks:
+  default:
+    name: shopping_mall_net
+    driver: bridge
