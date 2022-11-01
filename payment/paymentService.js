@@ -1,8 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const { execQuery, execTransaction } = require("../lib/mysqlUtil");
+// const { execQuery, execTransaction } = require("../lib/mysqlUtil");
 const MessageBrokerQ = require("../lib/MessageBrokerQ");
+const { put, get } = require("../lib/dynamoUtil");
+const { getYYYYMMDDHHMMSS } = require("../lib/dateUtil");
 
 let paymentQ, orderQ;
 initQ();
@@ -76,7 +78,8 @@ async function messageHandler(message) {
       case "PRODUCT_RESERVED":
         break;
       case "TRANSACTION_ROLLBACK":
-        await cancelPayment(data.transactionId);
+        //await cancelPayment(data.transactionId);
+        cancelPaymentToDynamo(data.transactionId);
         return;
       default:
         console.log(`UNKNOWN EVENT: ${jsonMessage}`);
@@ -88,7 +91,8 @@ async function messageHandler(message) {
     }
 
     // create payment
-    await createPayment(data.transactionId, data.totalPrice);
+    // await createPayment(data.transactionId, data.totalPrice);
+    await createPaymentToDynamo(data.transactionId, data.totalPrice);
     console.log(
       `[PAYMENT SERVICE -> ORDER OCHESTRATOR]: PAYMENT_COMPLETED - ${data.transactionId}`
     );
@@ -124,6 +128,27 @@ async function notifyRollBack(data, reason) {
     );
 }
 
+async function createPaymentToDynamo(transactionId, price) {
+  const item = {
+    transactionId: transactionId,
+    price: price,
+    status: "COMPLETED",
+    createdAt: getYYYYMMDDHHMMSS(),
+  };
+  return put(item, "payments");
+}
+
+async function cancelPaymentToDynamo(transactionId) {
+  const { Item } = await get({ transactionId }, "payments");
+  const updateItem = {
+    ...Item,
+    status: "CANCELLED",
+  };
+  await put(updateItem, "payments");
+}
+
+/* mysql version */
+/*
 async function createPayment(transactionId, price) {
   const sql = `
     insert into payments(transactionId, price, status)
@@ -155,3 +180,5 @@ async function findById(id) {
   const result = await execQuery(sql, bindParams);
   return result;
 }
+
+*/

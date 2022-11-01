@@ -1,9 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 const app = express();
-const { execQuery, execTransaction } = require("../lib/mysqlUtil");
+// const { execQuery, execTransaction } = require("../lib/mysqlUtil");
 const { getYYYYMMDDHHMMSS } = require("../lib/dateUtil");
 const MessageBrokerQ = require("../lib/MessageBrokerQ");
+const { put, get } = require("../lib/dynamoUtil");
 
 let deliveryQ, orderQ;
 initQ();
@@ -78,7 +79,7 @@ async function messageHandler(message) {
       case "PAYMENT_COMPLETED":
         break;
       case "TRANSACTION_ROLLBACK":
-        await cancelDelivery(data.transactionId);
+        await cancelDeliveryToDynamo(data.transactionId);
         return;
       default:
         console.log(`UNKNOWN EVENT: ${jsonMessage}`);
@@ -89,7 +90,7 @@ async function messageHandler(message) {
       throw new Error("delivery_failed");
     }
     // delivery reserve
-    await createDelivery(data.transactionId);
+    await createDeliveryToDynamo(data.transactionId);
 
     console.log(
       `[DELIVERY SERVICE -> ORDER OCHESTRATOR]: DELIVERY_RESERVED - ${data.transactionId}`
@@ -126,6 +127,27 @@ async function notifyRollBack(data, reason) {
     );
 }
 
+async function createDeliveryToDynamo(transactionId) {
+  const item = {
+    transactionId: transactionId,
+    schedule: getYYYYMMDDHHMMSS(),
+    status: "RESERVED",
+    createdAt: getYYYYMMDDHHMMSS(),
+  };
+  return put(item, "delivery");
+}
+
+async function cancelDeliveryToDynamo(transactionId) {
+  const { Item } = await get({ transactionId }, "delivery");
+  const updateItem = {
+    ...Item,
+    status: "CANCELLED",
+  };
+  await put(updateItem, "delivery");
+}
+
+/* mysql version */
+/*
 async function createDelivery(transactionId) {
   const sql = `
     insert into delivery(transactionId, schedule, status)
@@ -156,3 +178,4 @@ async function findById(id) {
   const result = await execQuery(sql, bindParams);
   return result;
 }
+*/

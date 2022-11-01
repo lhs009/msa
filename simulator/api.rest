@@ -1,5 +1,5 @@
 ###
-GET http://localhost:3000/users
+GET http://localhost:3000/users/1
 
 ###
 GET http://localhost:3001/products
@@ -21,15 +21,65 @@ POST http://localhost:3003/orders
 Content-Type: application/json
 
 {
+  "requestType": "success",
   "order": {
-    "user_id": "user",
+    "userId": 1,
     "name": "Hong Gil Dong",
     "addr": "29, Hansil-ro, Dalseo-gu, Daegu, Republic of Korea",
     "tel": "01012341234",
-    "email": "hong@gil.com"
-  },
-  "product": {
-    "id": 2,
-    "quantity": 5
+    "email": "hong@gil.com",
+    "productId": 3,
+    "quantity": 10
+  }
+}
+
+###
+POST http://localhost:3003/orders
+Content-Type: application/json
+
+{
+  "requestType": "product_failed",
+  "order": {
+    "userId": 1,
+    "name": "Hong Gil Dong",
+    "addr": "29, Hansil-ro, Dalseo-gu, Daegu, Republic of Korea",
+    "tel": "01012341234",
+    "email": "hong@gil.com",
+    "productId": 4,
+    "quantity": 30
+  }
+}
+
+###
+POST http://localhost:3003/orders
+Content-Type: application/json
+
+{
+  "requestType": "payment_failed",
+  "order": {
+    "userId": 1,
+    "name": "Hong Gil Dong",
+    "addr": "29, Hansil-ro, Dalseo-gu, Daegu, Republic of Korea",
+    "tel": "01012341234",
+    "email": "hong@gil.com",
+    "productId": 2,
+    "quantity": 9
+  }
+}
+
+###
+POST http://localhost:3003/orders
+Content-Type: application/json
+
+{
+  "requestType": "delivery_failed",
+  "order": {
+    "userId": 1,
+    "name": "Hong Gil Dong",
+    "addr": "29, Hansil-ro, Dalseo-gu, Daegu, Republic of Korea",
+    "tel": "01012341234",
+    "email": "hong@gil.com",
+    "productId": 2,
+    "quantity": 3
   }
 }

@@ -2,8 +2,6 @@
 CREATE DATABASE user_db default CHARACTER SET UTF8;
 CREATE DATABASE product_db default CHARACTER SET UTF8; 
 CREATE DATABASE order_db default CHARACTER SET UTF8;
-CREATE DATABASE payment_db default CHARACTER SET UTF8;
-CREATE DATABASE delivery_db default CHARACTER SET UTF8; 
 
 -- 사용자 테이블
 use user_db;
@@ -23,33 +21,19 @@ CREATE TABLE products (
   quantity int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- 주문 테이블 생성
 use order_db;
-CREATE TABLE orders (
-  transactionId varchar(80) NOT NULL PRIMARY KEY,
-  userId varchar(10) NOT NULL,
-  productId int(10) NOT NULL,
-  quantity int(10) NOT NULL,
-  status varchar(10) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+CREATE TABLE `orders` (
+  `orderId` INT NOT NULL AUTO_INCREMENT,
+  `transactionId` VARCHAR(80) NOT NULL,
+  `userId` int(10) NOT NULL,
+  `createdAt` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `productId` INT NOT NULL,
+  `quantity` INT NOT NULL,
+  `status` VARCHAR(20) NOT NULL,
+  UNIQUE INDEX `transactionId_UNIQUE` (`transactionId` ASC) VISIBLE,
+  PRIMARY KEY (`orderId`))
+ENGINE = InnoDB;
 
--- 결제 테이블 생성
-use payment_db;
-CREATE TABLE payments (
-  -- paymentId int(10) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  transactionId varchar(80) NOT NULL PRIMARY KEY,
-  price int(10) NOT NULL,
-  status varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-# 배송 테이블 생성
-use delivery_db;
-CREATE TABLE delivery(
-  -- deliveryId int(10) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-  transactionId varchar(80) NOT NULL PRIMARY KEY,
-  schedule varchar(120) NOT NULL,
-  status varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- 사용자 입력
 use user_db;
@@ -63,8 +47,35 @@ INSERT INTO products(name, price, quantity) VALUES('모자', 25000, 100);
 INSERT INTO products(name, price, quantity) VALUES('자켓', 150000, 100);
 INSERT INTO products(name, price, quantity) VALUES('신발', 15000, 100);
 
-# events
 
+# dynamo db
+# payment db 생성
+aws dynamodb create-table \
+    --endpoint-url http://localhost:8000 \
+    --table-name delivery \
+    --attribute-definitions AttributeName=transactionId,AttributeType=S \
+    --key-schema AttributeName=transactionId,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+
+# delivry db 생성
+aws dynamodb create-table \
+    --endpoint-url http://localhost:8000 \
+    --table-name payments \
+    --attribute-definitions AttributeName=transactionId,AttributeType=S \
+    --key-schema AttributeName=transactionId,KeyType=HASH \
+    --provisioned-throughput ReadCapacityUnits=1,WriteCapacityUnits=1
+
+# payment db 삭제
+aws dynamodb delete-table \
+    --endpoint-url http://localhost:8000 \
+    --table-name payments
+
+# delivery db 삭제
+aws dynamodb delete-table \
+    --endpoint-url http://localhost:8000 \
+    --table-name delivery
+
+# IPC events
 ORDER_CREATED
 PRODUCT_RESERVED
 PAYMENT_COMPLETED
@@ -73,36 +84,3 @@ DELIVERY_RESERVE_FAILED
 PRDOUCT_RESERVER_FAILED
 PAYMENT_FAILED
 ORDER_COMPLETED
-
-
-
-/orders?case=success
-/orders?case=user_failure
-/orders?case=product_failure
-/orders?case=payment_failure
-/orders?case=delivery_failure
-
-
-
-# 주문 요청
-
-curl -v -XPOST http://localhost:8080/v1/order -H'Content-Type: application/json' \
---data-binary @- << EOF
-{
-  "order": {
-    "user_id": "user",
-    "name": "Hong Gil Dong",
-    "addr": "29, Hansil-ro, Dalseo-gu, Daegu, Republic of Korea",
-    "tel": "01012341234",
-    "email": "hong@gil.com"
-  },
-  "product": {
-    "id": 2,
-    "quantity": 5
-  }
-}
-EOF
-
-# 주문현황 조회
-
-curl -v -XGET http://localhost:8080/v1/order?transaction_id=${TRANSACTION_ID}&user_id=user
