@@ -3,7 +3,7 @@
 Container - Docker, Docker-Compose
 Application Runtime - NodeJS
 Backend Framework – Express
-Database – MySQL
+RDB – MySQL
 NoSql - DynamoDB
 Message Broker - RabbitMQ
 
@@ -34,22 +34,39 @@ user:
 - RDB mysql
 - database name: user_db
 - table name: users
-  product:
+
+product:
+
 - RDB mysql
 - database name: product_db
 - table name: products
-  order:
+
+order:
+
 - RDB mysql
 - database name: order_db
 - table name: orders
-  payments:
+
+payments:
+
 - NoSQL DynamoDB
 - table name: payments
-  delivery:
+
+delivery:
+
 - NoSQL DynamoDB
 - table name: delivery
 
 # 실행
 
 1. database 디렉토리에서 docker-compose up -d
+2. 마이크로서비스 별 mysql database 생성 (user_db, product_db, order_db)
+
+- 각 database에 users, products, orders table 생성
+- user data 생성, product data 생성
+
+3. 마이크로서비스 별 dynamo nosql database 생성
+
+- payments, delivery table 생성
+
 2. root 디렉토리에서 docker-compose up

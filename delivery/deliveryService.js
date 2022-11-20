@@ -1,3 +1,9 @@
+/**
+ *  file: deliveryService.js
+ *  writer: hwansoo.lee
+ *  description: delivery service example
+ *
+ */
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -22,7 +28,8 @@ app.get("/health", (req, res) => {
 app.get("/deliveries", async (req, res) => {
   let result;
   try {
-    result = await findAll(0, 100);
+    //result = await findAll(0, 100);
+    result = [];
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -36,7 +43,7 @@ app.get("/deliveries", async (req, res) => {
 app.get("/deliveries/:id", async (req, res) => {
   let result;
   try {
-    result = await findById(req.params.id);
+    result = await findByIdFromDynamo(req.params.id);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -144,6 +151,11 @@ async function cancelDeliveryToDynamo(transactionId) {
     status: "CANCELLED",
   };
   await put(updateItem, "delivery");
+}
+
+async function findByIdFromDynamo(transactionId) {
+  const { Item } = await get({ transactionId }, "delivery");
+  return Item ? Item : {};
 }
 
 /* mysql version */

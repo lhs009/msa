@@ -1,3 +1,9 @@
+/**
+ *  file: OrderOchestrator.js
+ *  writer: hwansoo.lee
+ *  description: Order Serice SAGA
+ *
+ */
 "use strict";
 
 const MessageBrokerQ = require("../lib/MessageBrokerQ");
@@ -77,29 +83,11 @@ class OrderOchestrator {
           );
           return;
         case "DELIVERY_RESERVED":
-          // console.log(
-          //   `[ORDER ORCHESTRATOR -> ORDER ORCHESTRATOR]: ${event} - ${data.transactionId}`
-          // );
-          // this.#orderQ.sendMessage(
-          //   Buffer.from(
-          //     JSON.stringify({
-          //       ...data,
-          //       event: "ORDER_COMPLETED",
-          //     })
-          //   )
-          // );
           console.log(
             `[ORDER TRANSACITION COMPLETED]: ${event} - ${data.transactionId}`
           );
           this.#orderReportCallback(data.transactionId, "COMPLETED");
           return;
-          return;
-        // case "ORDER_COMPLETED":
-        //   console.log(
-        //     `[ORDER TRANSACITION COMPLETED]: ${event} - ${data.transactionId}`
-        //   );
-        //   this.#orderReportCallback(data.transactionId, "COMPLETED");
-        //   return;
         case "PRODUCT_RESERVE_FAILED":
           this.#orderReportCallback(data.transactionId, "CANCELLED");
           return;

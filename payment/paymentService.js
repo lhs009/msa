@@ -1,3 +1,9 @@
+/**
+ *  file: paymentService.js
+ *  writer: hwansoo.lee
+ *  description: payment service example
+ *
+ */
 const express = require("express");
 const cors = require("cors");
 const app = express();
@@ -22,7 +28,8 @@ app.get("/health", (req, res) => {
 app.get("/payments", async (req, res) => {
   let result;
   try {
-    result = await findAll(0, 100);
+    //result = await findAll(0, 100);
+    result = [];
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -36,7 +43,8 @@ app.get("/payments", async (req, res) => {
 app.get("/payments/:id", async (req, res) => {
   let result;
   try {
-    result = await findById(req.params.id);
+    //result = await findById(req.params.id);
+    result = await findByIdFromDynamo(req.params.id);
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({
@@ -145,6 +153,11 @@ async function cancelPaymentToDynamo(transactionId) {
     status: "CANCELLED",
   };
   await put(updateItem, "payments");
+}
+
+async function findByIdFromDynamo(transactionId) {
+  const { Item } = await get({ transactionId }, "payments");
+  return Item ? Item : {};
 }
 
 /* mysql version */

@@ -5,15 +5,13 @@ GET http://localhost:3000/users/1
 GET http://localhost:3001/products
 
 ###
-GET http://localhost:3002/payments
-
-
-###
-GET http://localhost:3003/orders
-
+GET http://localhost:3003/orders/bedbc5cf-a6ab-4406-be47-8a8d713317ff
 
 ###
-GET http://localhost:3004/deliveries
+GET http://localhost:3002/payments/bd8a844d-c831-4d59-90a4-01bce3b8218
+
+###
+GET http://localhost:3004/deliveries/6e3a85d0-9e7c-4041-a3d3-8a0c81f1b69b
 
 
 ###
@@ -23,7 +21,7 @@ Content-Type: application/json
 {
   "requestType": "success",
   "order": {
-    "userId": 1,
+    "userId": 3,
     "name": "Hong Gil Dong",
     "addr": "29, Hansil-ro, Dalseo-gu, Daegu, Republic of Korea",
     "tel": "01012341234",

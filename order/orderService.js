@@ -1,3 +1,9 @@
+/**
+ *  file: orderService.js
+ *  writer: hwansoo.lee
+ *  description: order service example
+ *
+ */
 const express = require("express");
 const cors = require("cors");
 const { v4: uuid } = require("uuid");
@@ -19,12 +25,11 @@ app.get("/health", (req, res) => {
   });
 });
 
-app.get("/orders", async (req, res) => {
+app.get("/orders", async (req, res, next) => {
   let result;
   try {
     result = await findAll(0, 100);
   } catch (err) {
-    console.error(err.message);
     return res.status(500).json({
       errMessage: err.message,
     });
@@ -86,7 +91,18 @@ app.post("/orders", async (req, res) => {
 app.get("/orders/:id", async (req, res) => {
   let result;
   try {
-    result = await findById(req.params.id);
+    let transactionId = req.params.id;
+    let p = await Promise.all([
+      findById(transactionId),
+      axios.get(`http://payment-service:3002/payments/${transactionId}`),
+      axios.get(`http://delivery-service:3004/deliveries/${transactionId}`),
+    ]);
+
+    result = {
+      order: p[0],
+      payment: p[1].data,
+      delivery: p[2].data,
+    };
   } catch (err) {
     console.error(err.message);
     return res.status(500).json({

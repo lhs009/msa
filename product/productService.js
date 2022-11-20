@@ -1,3 +1,9 @@
+/**
+ *  file: productService.js
+ *  writer: hwansoo.lee
+ *  description: product service example
+ *
+ */
 const express = require("express");
 const cors = require("cors");
 const app = express();

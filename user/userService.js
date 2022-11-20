@@ -1,3 +1,9 @@
+/**
+ *  file: userService.js
+ *  writer: hwansoo.lee
+ *  description: user service example
+ *
+ */
 const express = require("express");
 const cors = require("cors");
 const app = express();
